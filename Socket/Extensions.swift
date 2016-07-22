@@ -8,40 +8,39 @@
 
 import Foundation
 
-
-class StreamDelegate: NSObject, NSStreamDelegate {
-    
-   var function: Callback
-    
-   init(function: (s: NSStream, e: NSStreamEvent) -> ()) {
-      self.function = function
+internal class StreamDelegate: NSObject, NSStreamDelegate {
+   
+   private var callback: Callback
+   
+   internal init(_ callback: Callback) {
+      self.callback = callback
    }
-    
-   func stream(stream: NSStream, handleEvent eventCode: NSStreamEvent) {
-      function(stream, eventCode)
+   
+   internal func stream(stream: NSStream, handleEvent eventCode: NSStreamEvent) {
+      callback(stream, eventCode)
    }
-    
-   typealias Callback = (NSStream, NSStreamEvent) -> ()
-    
+   
+   internal typealias Callback = (NSStream, NSStreamEvent) -> ()
+   
 }
 
-extension NSInputStream {
-    
-   func readAllData() -> NSData {
-        
+internal extension NSInputStream {
+   
+   internal func readAllData() -> NSData {
+      
       let data   = NSMutableData()
       var buffer = [UInt8](count: 4096, repeatedValue: 0)
-        
+      
       while self.hasBytesAvailable {
-            
+         
          let length = read(&buffer, maxLength: buffer.count)
-            
+         
          if length > 0 {
             data.appendBytes(buffer, length: length)
          }
       }
-        
+      
       return data
    }
-
+   
 }
