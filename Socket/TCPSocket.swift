@@ -19,7 +19,7 @@ public protocol TCPSocketDelegate {
 
 public class TCPSocket {
    
-   private let queue = dispatch_queue_create("com.gagnant.socket.socketqueue", nil)
+   public let queue = dispatch_queue_create("com.gagnant.socket.socketqueue", DISPATCH_QUEUE_CONCURRENT)
    
    /**
     *  This variable used when it's time to notify delegate
@@ -85,26 +85,27 @@ public class TCPSocket {
       }
    }
    
-   public func disconnect() {
+   public func disconnect() { dispatch_async(queue) {
       
       guard self.dispatchOnceToken != 0 else { return }
       
-      inputStream .close()
-      outputStream.close()
+      self.inputStream .close()
+      self.outputStream.close()
       
-      inputStream .removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
-      outputStream.removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+      self.inputStream .removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+      self.outputStream.removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
       
-      inputStream .delegate = nil
-      outputStream.delegate = nil
+      self.inputStream .delegate = nil
+      self.outputStream.delegate = nil
       
-      inputStream  = nil;
-      outputStream = nil;
+      self.inputStream  = nil;
+      self.outputStream = nil;
       
-      delegate?.socketDidDisconnect(self)
-   }
+      self.delegate?.socketDidDisconnect(self)
+      
+   }}
    
-   public func write(text: String) {
+   public func write(text: String) { dispatch_async(queue) {
       
       guard self.dispatchOnceToken != 0 else { return }
       
@@ -112,7 +113,8 @@ public class TCPSocket {
       let length = data.count
       
       self.outputStream.write(data, maxLength: length)
-   }
+      
+   }}
    
    private func cInputStream(stream: NSStream, event: NSStreamEvent) {
       
@@ -135,7 +137,7 @@ public class TCPSocket {
             }
          
          case NSStreamEvent.EndEncountered:
-            delegate?.socketDidDisconnect(self)
+            self.disconnect()
          
          default: break
       }
@@ -153,6 +155,7 @@ public class TCPSocket {
             disconnect()
          
          default: break
+         
       }
    }
    
@@ -183,9 +186,8 @@ public class TCPSocket {
       if inputStream.streamStatus == NSStreamStatus.Open &&
          outputStream.streamStatus == NSStreamStatus.Open {
          
-         dispatch_once(&dispatchOnceToken, { self.delegate?.socketDidConnect(self) })
+         dispatch_once(&dispatchOnceToken) { self.delegate?.socketDidConnect(self) }
       }
-      
    }
    
 }
