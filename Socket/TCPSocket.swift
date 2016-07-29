@@ -19,7 +19,7 @@ public protocol TCPSocketDelegate {
 
 public class TCPSocket {
    
-   public let queue = dispatch_queue_create("com.gagnant.socket.socketqueue", DISPATCH_QUEUE_CONCURRENT)
+   public let queue = dispatch_queue_create("com.gagnant.socket.socketqueue", DISPATCH_QUEUE_SERIAL)
    
    /**
     *  This variable used when it's time to notify delegate
@@ -34,9 +34,15 @@ public class TCPSocket {
    
    private var inputStreamDelegate  : StreamDelegate?
    private var outputStreamDelegate : StreamDelegate?
-   private var inputStream          : NSInputStream!
-   private var outputStream         : NSOutputStream!
+   private var inputStream          : NSInputStream?
+   private var outputStream         : NSOutputStream?
    private var options              : Settings
+   
+   private var dataWritingQueue: NSMutableArray
+   private var canSendDataDirectly: Bool
+   private var currentDataOffset: Int
+   
+   private var runLoop: CFRunLoop?
    
    public var delegate: TCPSocketDelegate?
    
@@ -46,6 +52,14 @@ public class TCPSocket {
          SocketSecurityLevelKey:SocketSecurityLevelNegotiated,
          SocketValidatesCertificateChainKey:true
       ]
+      
+      runLoop = CFRunLoopGetCurrent()
+      
+      dataWritingQueue    = NSMutableArray()
+      canSendDataDirectly = false
+      currentDataOffset   = 0
+      
+      delegate = nil
       
       inputStreamDelegate  = StreamDelegate(cInputStream )
       outputStreamDelegate = StreamDelegate(cOutputStream)
@@ -57,7 +71,10 @@ public class TCPSocket {
    
    public func connect(host: String, port: UInt32, settings: Settings = Settings()) {
       
-      self.disconnect()
+      if self.dispatchOnceToken != 0 {
+         self.disconnect()
+      }
+      
       self.dispatchOnceToken = 0
       
       var readStream : Unmanaged<CFReadStream >?
@@ -68,52 +85,50 @@ public class TCPSocket {
       inputStream  =  readStream!.takeRetainedValue()
       outputStream = writeStream!.takeRetainedValue()
       
-      inputStream .delegate = inputStreamDelegate
-      outputStream.delegate = outputStreamDelegate
+      inputStream! .delegate = inputStreamDelegate
+      outputStream!.delegate = outputStreamDelegate
       
       self.parseSettings(settings)
       
       dispatch_async(queue) {
          
-         self.inputStream .scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
-         self.outputStream.scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+         self.inputStream! .scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+         self.outputStream!.scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
          
-         self.inputStream .open()
-         self.outputStream.open()
+         self.inputStream! .open()
+         self.outputStream!.open()
+         
+         self.runLoop = CFRunLoopGetCurrent()
          
          NSRunLoop.currentRunLoop().run()
       }
    }
    
-   public func disconnect() { dispatch_async(queue) {
+   public func disconnect() { RunLoopPerformBlockAndWakeUp(runLoop, NSDefaultRunLoopMode) {
       
-      guard self.dispatchOnceToken != 0 else { return }
+      self.inputStream? .close()
+      self.outputStream?.close()
       
-      self.inputStream .close()
-      self.outputStream.close()
+      self.inputStream? .removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+      self.outputStream?.removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
       
-      self.inputStream .removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
-      self.outputStream.removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+      self.inputStream? .delegate = nil
+      self.outputStream?.delegate = nil
       
-      self.inputStream .delegate = nil
-      self.outputStream.delegate = nil
-      
-      self.inputStream  = nil;
-      self.outputStream = nil;
+      self.inputStream  = nil
+      self.outputStream = nil
       
       self.delegate?.socketDidDisconnect(self)
-      
    }}
    
-   public func write(text: String) { dispatch_async(queue) {
+   public func write(text: String) { RunLoopPerformBlockAndWakeUp(runLoop, NSDefaultRunLoopMode) {
       
       guard self.dispatchOnceToken != 0 else { return }
       
-      let data   = [UInt8](text.utf8)
+      let data = Array(text.utf8)
       let length = data.count
       
-      self.outputStream.write(data, maxLength: length)
-      
+      self.outputStream?.write(data, maxLength: length)
    }}
    
    private func cInputStream(stream: NSStream, event: NSStreamEvent) {
@@ -129,7 +144,7 @@ public class TCPSocket {
          
          case NSStreamEvent.HasBytesAvailable:
          
-            let data = inputStream.readAllData()
+            let data = inputStream!.readAllData()
             let text = String(data: data, encoding: NSUTF8StringEncoding)!
          
             if text != "" {
@@ -155,8 +170,8 @@ public class TCPSocket {
             disconnect()
          
          default: break
-         
       }
+      
    }
    
    private func parseSettings(settings: Settings) {
@@ -165,8 +180,8 @@ public class TCPSocket {
       
       if options[SocketSecurityLevelKey]!.isEqual(SocketSecurityLevelNegotiated) {
          
-         inputStream .setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
-         outputStream.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
+         inputStream! .setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
+         outputStream!.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
          
          if options[SocketValidatesCertificateChainKey]!.isEqual(false) {
             
@@ -183,8 +198,8 @@ public class TCPSocket {
    
    private func handleSocketOpenning() {
       
-      if inputStream.streamStatus == NSStreamStatus.Open &&
-         outputStream.streamStatus == NSStreamStatus.Open {
+      if inputStream!.streamStatus == NSStreamStatus.Open &&
+         outputStream!.streamStatus == NSStreamStatus.Open {
          
          dispatch_once(&dispatchOnceToken) { self.delegate?.socketDidConnect(self) }
       }

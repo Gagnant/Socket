@@ -44,3 +44,8 @@ internal extension NSInputStream {
    }
    
 }
+
+internal func RunLoopPerformBlockAndWakeUp(loop: CFRunLoop!, _ mode: AnyObject!, _ block: () -> Void) {
+   CFRunLoopPerformBlock(loop, mode, block)
+   CFRunLoopWakeUp(loop)
+}
