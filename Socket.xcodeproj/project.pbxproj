@@ -6,6 +6,20 @@
 	objectVersion = 46;
 	objects = {
 
+/* Begin PBXAggregateTarget section */
+		046D978B1D55D845008AB245 /* SocketFat */ = {
+			isa = PBXAggregateTarget;
+			buildConfigurationList = 046D978C1D55D845008AB245 /* Build configuration list for PBXAggregateTarget "SocketFat" */;
+			buildPhases = (
+				046D978F1D55D858008AB245 /* ShellScript */,
+			);
+			dependencies = (
+			);
+			name = SocketFat;
+			productName = SocketFat;
+		};
+/* End PBXAggregateTarget section */
+
 /* Begin PBXBuildFile section */
 		0460DE4A1D42AAB30065A39D /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0460DE491D42AAB30065A39D /* Options.swift */; };
 		0492C7C31D20106800C5FD51 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 0492C7C21D20106800C5FD51 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
@@ -118,6 +132,9 @@
 				LastUpgradeCheck = 0730;
 				ORGANIZATIONNAME = "Andrew Visotskyy";
 				TargetAttributes = {
+					046D978B1D55D845008AB245 = {
+						CreatedOnToolsVersion = 7.3.1;
+					};
 					0492C7BE1D20106800C5FD51 = {
 						CreatedOnToolsVersion = 7.3.1;
 					};
@@ -136,6 +153,7 @@
 			projectRoot = "";
 			targets = (
 				0492C7BE1D20106800C5FD51 /* Socket */,
+				046D978B1D55D845008AB245 /* SocketFat */,
 			);
 		};
 /* End PBXProject section */
@@ -149,6 +167,22 @@
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXResourcesBuildPhase section */
+
+/* Begin PBXShellScriptBuildPhase section */
+		046D978F1D55D858008AB245 /* ShellScript */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+			);
+			outputPaths = (
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "#!/bin/sh\n\nUNIVERSAL_OUTPUTFOLDER=${BUILD_DIR}/${CONFIGURATION}-universal\n\n# make sure the output directory exists\nmkdir -p \"${UNIVERSAL_OUTPUTFOLDER}\"\n\n# Step 1. Build Device and Simulator versions\nxcodebuild -target \"${PROJECT_NAME}\" ONLY_ACTIVE_ARCH=NO -configuration ${CONFIGURATION} -sdk iphoneos  BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\nxcodebuild -target \"${PROJECT_NAME}\" -configuration ${CONFIGURATION} -sdk iphonesimulator ONLY_ACTIVE_ARCH=NO BUILD_DIR=\"${BUILD_DIR}\" BUILD_ROOT=\"${BUILD_ROOT}\" clean build\n\n# Step 2. Copy the framework structure (from iphoneos build) to the universal folder\ncp -R \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/${PROJECT_NAME}.framework\" \"${UNIVERSAL_OUTPUTFOLDER}/\"\n\n# Step 3. Copy Swift modules from iphonesimulator build (if it exists) to the copied framework directory\nSIMULATOR_SWIFT_MODULES_DIR=\"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${PROJECT_NAME}.framework/Modules/${PROJECT_NAME}.swiftmodule/.\"\nif [ -d \"${SIMULATOR_SWIFT_MODULES_DIR}\" ]; then\ncp -R \"${SIMULATOR_SWIFT_MODULES_DIR}\" \"${UNIVERSAL_OUTPUTFOLDER}/${PROJECT_NAME}.framework/Modules/${PROJECT_NAME}.swiftmodule\"\nfi\n\n# Step 4. Create universal binary file using lipo and place the combined executable in the copied framework directory\nlipo -create -output \"${UNIVERSAL_OUTPUTFOLDER}/${PROJECT_NAME}.framework/${PROJECT_NAME}\" \"${BUILD_DIR}/${CONFIGURATION}-iphonesimulator/${PROJECT_NAME}.framework/${PROJECT_NAME}\" \"${BUILD_DIR}/${CONFIGURATION}-iphoneos/${PROJECT_NAME}.framework/${PROJECT_NAME}\"\n\n# Step 5. Convenience step to copy the framework to the project's directory\ncp -R \"${UNIVERSAL_OUTPUTFOLDER}/${PROJECT_NAME}.framework\" \"${PROJECT_DIR}\"\n\n# Step 6. Convenience step to open the project's directory in Finder\nopen \"${PROJECT_DIR}\"";
+		};
+/* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
 		0492C7BA1D20106800C5FD51 /* Sources */ = {
@@ -164,6 +198,20 @@
 /* End PBXSourcesBuildPhase section */
 
 /* Begin XCBuildConfiguration section */
+		046D978D1D55D845008AB245 /* Debug */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Debug;
+		};
+		046D978E1D55D845008AB245 /* Release */ = {
+			isa = XCBuildConfiguration;
+			buildSettings = {
+				PRODUCT_NAME = "$(TARGET_NAME)";
+			};
+			name = Release;
+		};
 		0492C7C51D20106800C5FD51 /* Debug */ = {
 			isa = XCBuildConfiguration;
 			buildSettings = {
@@ -266,6 +314,7 @@
 				INFOPLIST_FILE = Socket/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gagnant.Socket;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -284,6 +333,7 @@
 				INFOPLIST_FILE = Socket/Info.plist;
 				INSTALL_PATH = "$(LOCAL_LIBRARY_DIR)/Frameworks";
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks @loader_path/Frameworks";
+				ONLY_ACTIVE_ARCH = YES;
 				PRODUCT_BUNDLE_IDENTIFIER = com.gagnant.Socket;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
@@ -293,6 +343,14 @@
 /* End XCBuildConfiguration section */
 
 /* Begin XCConfigurationList section */
+		046D978C1D55D845008AB245 /* Build configuration list for PBXAggregateTarget "SocketFat" */ = {
+			isa = XCConfigurationList;
+			buildConfigurations = (
+				046D978D1D55D845008AB245 /* Debug */,
+				046D978E1D55D845008AB245 /* Release */,
+			);
+			defaultConfigurationIsVisible = 0;
+		};
 		0492C7B91D20106800C5FD51 /* Build configuration list for PBXProject "Socket" */ = {
 			isa = XCConfigurationList;
 			buildConfigurations = (

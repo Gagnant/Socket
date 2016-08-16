@@ -9,10 +9,20 @@
 			<key>orderHint</key>
 			<integer>0</integer>
 		</dict>
+		<key>SocketFat.xcscheme</key>
+		<dict>
+			<key>orderHint</key>
+			<integer>1</integer>
+		</dict>
 	</dict>
 	<key>SuppressBuildableAutocreation</key>
 	<dict>
 		<key>046458C51D2E74290081D8E3</key>
+		<dict>
+			<key>primary</key>
+			<true/>
+		</dict>
+		<key>046D978B1D55D845008AB245</key>
 		<dict>
 			<key>primary</key>
 			<true/>
