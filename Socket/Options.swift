@@ -13,7 +13,7 @@ public typealias Settings = Dictionary<String, AnyObject>
 /*  Security property key indicating the security level of
  *  the target stream.
  */
-public let SocketSecurityLevelKey = "SocketSecurityLevelKey"
+public let SocketSecurityLevel = "SocketSecurityLevelKey"
 
 /*  Specifies that the highest level security protocol that
  *  can be negotiated be set as the security protocol for a
@@ -30,4 +30,4 @@ public let SocketSecurityLevelNone = "SocketSecurityLevelNone"
  *  chain should be validated or not.  The value is true by
  *  default (not set).
  */
-public let SocketValidatesCertificateChainKey = "SocketValidatesCertificateChainKey"
+public let SocketValidatesCertificateChain = "SocketValidatesCertificateChainKey"
