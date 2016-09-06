@@ -49,8 +49,8 @@ public class TCPSocket {
    public init() {
       
       options = [
-         SocketSecurityLevelKey:SocketSecurityLevelNegotiated,
-         SocketValidatesCertificateChainKey:true
+         SocketSecurityLevel:SocketSecurityLevelNegotiated,
+         SocketValidatesCertificateChain:true
       ]
       
       runLoop = CFRunLoopGetCurrent()
@@ -178,12 +178,12 @@ public class TCPSocket {
       
       settings.forEach({ options[$0] = $1 })
       
-      if options[SocketSecurityLevelKey]!.isEqual(SocketSecurityLevelNegotiated) {
+      if options[SocketSecurityLevel]!.isEqual(SocketSecurityLevelNegotiated) {
          
          inputStream! .setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
          outputStream!.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
          
-         if options[SocketValidatesCertificateChainKey]!.isEqual(false) {
+         if options[SocketValidatesCertificateChain]!.isEqual(false) {
             
             let settings = [
                kCFStreamSSLValidatesCertificateChain as String: kCFBooleanFalse
