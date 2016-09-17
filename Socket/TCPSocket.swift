@@ -10,107 +10,83 @@ import Foundation
 
 public protocol TCPSocketDelegate {
    
-   func socketDidConnect       (socket: TCPSocket)
-   func socketDidDisconnect    (socket: TCPSocket)
-   func socketDidReceiveMessage(socket: TCPSocket, text: String)
-   func socketDidFailWithError (socket: TCPSocket, error: NSError)
+   func socketDidConnect    (_ socket: TCPSocket)
+   func socketDidDisconnect (_ socket: TCPSocket)
+   
+   func socket (_ socket: TCPSocket, didReceiveMessage text: String)
+   func socket (_ socket: TCPSocket, didFailWithError error: NSError)
    
 }
 
 public class TCPSocket {
    
-   public let queue = dispatch_queue_create("com.gagnant.socket.socketqueue", DISPATCH_QUEUE_SERIAL)
-   
-   /**
-    *  This variable used when it's time to notify delegate
-    *  that the socket was opened. It's purpose is to send
-    *  notification only once, when both of streams (read &
-    *  write) successfully opened.
-    *
-    *  Equality to 0 means that connection didn't established
-    *  yet.
-    */
-   private var dispatchOnceToken: dispatch_once_t = 0
-   
-   private var inputStreamDelegate  : StreamDelegate?
-   private var outputStreamDelegate : StreamDelegate?
-   private var inputStream          : NSInputStream?
-   private var outputStream         : NSOutputStream?
-   private var options              : Settings
-   
-   private var dataWritingQueue: NSMutableArray
-   private var canSendDataDirectly: Bool
-   private var currentDataOffset: Int
-   
-   private var runLoop: CFRunLoop?
-   
+   public let queue = DispatchQueue(label: "com.gagnant.socket.socketqueue", attributes: [])
+
    public var delegate: TCPSocketDelegate?
+   public var status:   Status
    
-   public init() {
+   fileprivate var outputStreamDelegate: StreamDelegate?
+   fileprivate var inputStreamDelegate:  StreamDelegate?
+   fileprivate var outputStream:         OutputStream?
+   fileprivate var inputStream:          InputStream?
+   fileprivate var runLoop:              RunLoop?
+   fileprivate var options:              Settings
+
+   public init(delegate: TCPSocketDelegate? = nil) {
       
       options = [
-         SocketSecurityLevel:SocketSecurityLevelNegotiated,
-         SocketValidatesCertificateChain:true
+         SocketSecurityLevel:SocketSecurityLevelNegotiated as AnyObject,
+         SocketValidatesCertificateChain:true as AnyObject
       ]
       
-      runLoop = CFRunLoopGetCurrent()
-      
-      dataWritingQueue    = NSMutableArray()
-      canSendDataDirectly = false
-      currentDataOffset   = 0
-      
-      delegate = nil
+      self.runLoop  = nil
+      self.status   = .closed
+      self.delegate = delegate
       
       inputStreamDelegate  = StreamDelegate(cInputStream )
       outputStreamDelegate = StreamDelegate(cOutputStream)
    }
-   
+
    deinit {
       disconnect()
    }
-   
-   public func connect(host: String, port: UInt32, settings: Settings = Settings()) {
+
+   open func connect(_ host: String, port: Int, settings: Settings = Settings()) {
       
-      if self.dispatchOnceToken != 0 {
+      if self.status != .closed {
          self.disconnect()
       }
       
-      self.dispatchOnceToken = 0
+      self.status = .opening
       
-      var readStream : Unmanaged<CFReadStream >?
-      var writeStream: Unmanaged<CFWriteStream>?
+      Stream.getStreamsToHost(withName: host, port: port, inputStream: &inputStream,
+                                                         outputStream: &outputStream)
       
-      CFStreamCreatePairWithSocketToHost(nil, host, port, &readStream, &writeStream)
-      
-      inputStream  =  readStream!.takeRetainedValue()
-      outputStream = writeStream!.takeRetainedValue()
-      
-      inputStream! .delegate = inputStreamDelegate
-      outputStream!.delegate = outputStreamDelegate
+      inputStream! .delegate = inputStreamDelegate       
+      outputStream!.delegate = outputStreamDelegate       
       
       self.parseSettings(settings)
       
-      dispatch_async(queue) {
+      queue.async {
          
-         self.inputStream! .scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
-         self.outputStream!.scheduleInRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+         self.inputStream! .schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+         self.outputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
          
          self.inputStream! .open()
          self.outputStream!.open()
-         
-         self.runLoop = CFRunLoopGetCurrent()
-         
-         NSRunLoop.currentRunLoop().run()
+
+         self.runLoop = RunLoop.current
+         self.runLoop?.run()
       }
    }
    
-   public func disconnect() { RunLoopPerformBlockAndWakeUp(runLoop, NSDefaultRunLoopMode) {
+   open func disconnect() { runLoop?.performAndWakeUp {
       
       self.inputStream? .close()
       self.outputStream?.close()
       
-      self.inputStream? .removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
-      self.outputStream?.removeFromRunLoop(NSRunLoop.currentRunLoop(), forMode: NSDefaultRunLoopMode)
+      self.inputStream? .remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+      self.outputStream?.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
       
       self.inputStream? .delegate = nil
       self.outputStream?.delegate = nil
@@ -118,91 +94,101 @@ public class TCPSocket {
       self.inputStream  = nil
       self.outputStream = nil
       
+      self.status = .closed
       self.delegate?.socketDidDisconnect(self)
    }}
    
-   public func write(text: String) { RunLoopPerformBlockAndWakeUp(runLoop, NSDefaultRunLoopMode) {
+   open func write(_ text: String) { runLoop?.performAndWakeUp {
       
-      guard self.dispatchOnceToken != 0 else { return }
+      guard self.status == .opened else {
+         return
+      }
       
       let data = Array(text.utf8)
       let length = data.count
-      
+         
       self.outputStream?.write(data, maxLength: length)
    }}
-   
-   private func cInputStream(stream: NSStream, event: NSStreamEvent) {
+
+   fileprivate func cInputStream(_ stream: Stream, event: Stream.Event) {
       
       switch event {
          
-         case NSStreamEvent.OpenCompleted:
+         case Stream.Event.openCompleted:
             self.handleSocketOpenning()
          
-         case NSStreamEvent.ErrorOccurred:
-            delegate?.socketDidFailWithError(self, error: stream.streamError!)
+         case Stream.Event.errorOccurred:
+            delegate?.socket(self, didFailWithError: stream.streamError! as NSError)
             disconnect()
          
-         case NSStreamEvent.HasBytesAvailable:
+         case Stream.Event.hasBytesAvailable:
          
             let data = inputStream!.readAllData()
-            let text = String(data: data, encoding: NSUTF8StringEncoding)!
+            let text = String(data: data, encoding: String.Encoding.utf8)!
          
             if text != "" {
-               delegate?.socketDidReceiveMessage(self, text: text)
+               delegate?.socket(self, didReceiveMessage: text)
             }
          
-         case NSStreamEvent.EndEncountered:
+         case Stream.Event.endEncountered:
             self.disconnect()
          
          default: break
       }
    }
-   
-   private func cOutputStream(stream: NSStream, event: NSStreamEvent) {
+
+   fileprivate func cOutputStream(_ stream: Stream, event: Stream.Event) {
       
       switch event {
          
-         case NSStreamEvent.OpenCompleted:
+         case Stream.Event.openCompleted:
             self.handleSocketOpenning()
          
-         case NSStreamEvent.ErrorOccurred:
-            delegate?.socketDidFailWithError(self, error: stream.streamError!)
+         case Stream.Event.errorOccurred:
+            delegate?.socket(self, didFailWithError: stream.streamError! as NSError)
             disconnect()
          
          default: break
       }
-      
    }
-   
-   private func parseSettings(settings: Settings) {
+
+   fileprivate func parseSettings(_ settings: Settings) {
       
       settings.forEach({ options[$0] = $1 })
       
-      if options[SocketSecurityLevel]!.isEqual(SocketSecurityLevelNegotiated) {
-         
-         inputStream! .setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
-         outputStream!.setProperty(NSStreamSocketSecurityLevelNegotiatedSSL, forKey: NSStreamSocketSecurityLevelKey)
-         
-         if options[SocketValidatesCertificateChain]!.isEqual(false) {
+      if options[SocketSecurityLevel] as? String == SocketSecurityLevelNegotiated {
+      
+         inputStream! .setProperty(StreamSocketSecurityLevel.negotiatedSSL as Any, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+         outputStream!.setProperty(StreamSocketSecurityLevel.negotiatedSSL as Any, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+      
+         if options[SocketValidatesCertificateChain] as? Bool == false {
             
             let settings = [
                kCFStreamSSLValidatesCertificateChain as String: kCFBooleanFalse
             ]
             
-            CFReadStreamSetProperty (inputStream,  kCFStreamPropertySSLSettings, settings)
-            CFWriteStreamSetProperty(outputStream, kCFStreamPropertySSLSettings, settings)
+            let property = CFStreamPropertyKey(kCFStreamPropertySSLSettings)
+            let value    = settings as CFTypeRef
+            
+            CFReadStreamSetProperty (inputStream,  property, value)
+            CFWriteStreamSetProperty(outputStream, property, value)
          }
       }
-      
    }
    
-   private func handleSocketOpenning() {
+   fileprivate func handleSocketOpenning() {
       
-      if inputStream!.streamStatus == NSStreamStatus.Open &&
-         outputStream!.streamStatus == NSStreamStatus.Open {
+      guard self.status == .opening else {
+         return
+      }
+      
+      if inputStream!.streamStatus  == Stream.Status.open &&
+         outputStream!.streamStatus == Stream.Status.open {
          
-         dispatch_once(&dispatchOnceToken) { self.delegate?.socketDidConnect(self) }
+         delegate?.socketDidConnect(self)
+         status = .opened
       }
    }
    
 }
+

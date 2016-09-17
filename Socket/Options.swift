@@ -8,12 +8,12 @@
 
 import Foundation
 
-public typealias Settings = Dictionary<String, AnyObject>
+public typealias Settings = Dictionary<String, Any>
 
 /*  Security property key indicating the security level of
  *  the target stream.
  */
-public let SocketSecurityLevel = "SocketSecurityLevelKey"
+public let SocketSecurityLevel = "SocketSecurityLevel"
 
 /*  Specifies that the highest level security protocol that
  *  can be negotiated be set as the security protocol for a
@@ -30,4 +30,4 @@ public let SocketSecurityLevelNone = "SocketSecurityLevelNone"
  *  chain should be validated or not.  The value is true by
  *  default (not set).
  */
-public let SocketValidatesCertificateChain = "SocketValidatesCertificateChainKey"
+public let SocketValidatesCertificateChain = "SocketValidatesCertificateChain"

@@ -8,44 +8,57 @@
 
 import Foundation
 
-internal class StreamDelegate: NSObject, NSStreamDelegate {
+internal class StreamDelegate: NSObject, Foundation.StreamDelegate {
    
    private var callback: Callback
    
-   internal init(_ callback: Callback) {
+   internal init(_ callback: @escaping Callback) {
       self.callback = callback
    }
-   
-   internal func stream(stream: NSStream, handleEvent eventCode: NSStreamEvent) {
-      callback(stream, eventCode)
+
+   internal func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+      callback(aStream, eventCode)
    }
    
-   internal typealias Callback = (NSStream, NSStreamEvent) -> ()
+   internal typealias Callback = (Stream, Stream.Event) -> ()
    
 }
 
-internal extension NSInputStream {
+internal extension InputStream {
    
-   internal func readAllData() -> NSData {
+   internal func readAllData() -> Data {
       
       let data   = NSMutableData()
-      var buffer = [UInt8](count: 4096, repeatedValue: 0)
+      var buffer = [UInt8](repeating: 0, count: 4096)
       
       while self.hasBytesAvailable {
          
          let length = read(&buffer, maxLength: buffer.count)
          
          if length > 0 {
-            data.appendBytes(buffer, length: length)
+            data.append(buffer, length: length)
          }
       }
       
-      return data
+      return data as Data
    }
    
 }
 
-internal func RunLoopPerformBlockAndWakeUp(loop: CFRunLoop!, _ mode: AnyObject!, _ block: () -> Void) {
-   CFRunLoopPerformBlock(loop, mode, block)
-   CFRunLoopWakeUp(loop)
+internal extension RunLoop {
+   
+   /**
+    *  Schedules the execution of a block on the target run loop.
+    *   - parameter: block   The block to execute
+    */
+   internal func performAndWakeUp(block: @escaping () -> Swift.Void) {
+      
+      guard #available(iOS 10.0, *) else {
+         return RunLoopInvoker.invoke(onRunLoop: self, block)
+      }
+      
+      return self.perform(block)
+   }
+
 }
+

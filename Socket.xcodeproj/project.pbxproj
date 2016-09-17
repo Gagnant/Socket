@@ -21,6 +21,8 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		0406D4BE1D8BCD5500B2F257 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0406D4BD1D8BCD5500B2F257 /* Status.swift */; };
+		040AF8101D8BF1750056C68C /* RunLoopInvoker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040AF80F1D8BF1750056C68C /* RunLoopInvoker.swift */; };
 		0460DE4A1D42AAB30065A39D /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0460DE491D42AAB30065A39D /* Options.swift */; };
 		0492C7C31D20106800C5FD51 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 0492C7C21D20106800C5FD51 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0492C7EC1D21848700C5FD51 /* TCPSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0492C7EB1D21848700C5FD51 /* TCPSocket.swift */; };
@@ -28,6 +30,8 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		0406D4BD1D8BCD5500B2F257 /* Status.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
+		040AF80F1D8BF1750056C68C /* RunLoopInvoker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunLoopInvoker.swift; sourceTree = "<group>"; };
 		0460DE491D42AAB30065A39D /* Options.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; tabWidth = 3; };
 		0492C7BF1D20106800C5FD51 /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0492C7C21D20106800C5FD51 /* Socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
@@ -59,9 +63,11 @@
 		0460DE461D42754E0065A39D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
+				040AF80F1D8BF1750056C68C /* RunLoopInvoker.swift */,
+				0492C7EB1D21848700C5FD51 /* TCPSocket.swift */,
 				0492C7ED1D21850200C5FD51 /* Extensions.swift */,
 				0460DE491D42AAB30065A39D /* Options.swift */,
-				0492C7EB1D21848700C5FD51 /* TCPSocket.swift */,
+				0406D4BD1D8BCD5500B2F257 /* Status.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -129,7 +135,7 @@
 		0492C7B61D20106800C5FD51 /* Project object */ = {
 			isa = PBXProject;
 			attributes = {
-				LastUpgradeCheck = 0730;
+				LastUpgradeCheck = 0800;
 				ORGANIZATIONNAME = "Andrew Visotskyy";
 				TargetAttributes = {
 					046D978B1D55D845008AB245 = {
@@ -137,6 +143,7 @@
 					};
 					0492C7BE1D20106800C5FD51 = {
 						CreatedOnToolsVersion = 7.3.1;
+						LastSwiftMigration = 0800;
 					};
 				};
 			};
@@ -191,7 +198,9 @@
 			files = (
 				0492C7EC1D21848700C5FD51 /* TCPSocket.swift in Sources */,
 				0460DE4A1D42AAB30065A39D /* Options.swift in Sources */,
+				040AF8101D8BF1750056C68C /* RunLoopInvoker.swift in Sources */,
 				0492C7F01D21878D00C5FD51 /* Extensions.swift in Sources */,
+				0406D4BE1D8BCD5500B2F257 /* Status.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -226,8 +235,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -250,7 +261,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -275,8 +286,10 @@
 				CLANG_WARN_DIRECT_OBJC_ISA_USAGE = YES_ERROR;
 				CLANG_WARN_EMPTY_BODY = YES;
 				CLANG_WARN_ENUM_CONVERSION = YES;
+				CLANG_WARN_INFINITE_RECURSION = YES;
 				CLANG_WARN_INT_CONVERSION = YES;
 				CLANG_WARN_OBJC_ROOT_CLASS = YES_ERROR;
+				CLANG_WARN_SUSPICIOUS_MOVE = YES;
 				CLANG_WARN_UNREACHABLE_CODE = YES;
 				CLANG_WARN__DUPLICATE_METHOD_MATCH = YES;
 				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
@@ -293,9 +306,10 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
+				IPHONEOS_DEPLOYMENT_TARGET = 8.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
+				SWIFT_OPTIMIZATION_LEVEL = "-Owholemodule";
 				TARGETED_DEVICE_FAMILY = "1,2";
 				VALIDATE_PRODUCT = YES;
 				VERSIONING_SYSTEM = "apple-generic";
@@ -307,6 +321,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -319,6 +334,7 @@
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
 				SWIFT_OPTIMIZATION_LEVEL = "-Onone";
+				SWIFT_VERSION = 3.0;
 			};
 			name = Debug;
 		};
@@ -326,6 +342,7 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				CLANG_ENABLE_MODULES = YES;
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "";
 				DEFINES_MODULE = YES;
 				DYLIB_COMPATIBILITY_VERSION = 1;
 				DYLIB_CURRENT_VERSION = 1;
@@ -337,6 +354,7 @@
 				PRODUCT_BUNDLE_IDENTIFIER = com.gagnant.Socket;
 				PRODUCT_NAME = "$(TARGET_NAME)";
 				SKIP_INSTALL = YES;
+				SWIFT_VERSION = 3.0;
 			};
 			name = Release;
 		};
