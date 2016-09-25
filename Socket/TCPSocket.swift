@@ -24,6 +24,8 @@ public class TCPSocket {
 
    public var delegate: TCPSocketDelegate?
    public var status:   Status
+   public var host:     String
+   public var port:     Int
    
    fileprivate var outputStreamDelegate: StreamDelegate?
    fileprivate var inputStreamDelegate:  StreamDelegate?
@@ -32,7 +34,7 @@ public class TCPSocket {
    fileprivate var runLoop:              RunLoop?
    fileprivate var options:              Settings
 
-   public init(delegate: TCPSocketDelegate? = nil) {
+   public init(host: String, port: Int) {
       
       options = [
          SocketSecurityLevel:SocketSecurityLevelNegotiated as AnyObject,
@@ -40,18 +42,28 @@ public class TCPSocket {
       ]
       
       self.runLoop  = nil
+      self.delegate = nil
       self.status   = .closed
-      self.delegate = delegate
+      self.port     = port
+      self.host     = host
       
       inputStreamDelegate  = StreamDelegate(cInputStream )
       outputStreamDelegate = StreamDelegate(cOutputStream)
+   }
+   
+   public convenience init(host: String, port: Int, settings: Settings) {
+      self.init(host: host, port: port)
+      
+      settings.forEach { (key, value) in
+         options[key] = value
+      }
    }
 
    deinit {
       disconnect()
    }
 
-   open func connect(_ host: String, port: Int, settings: Settings = Settings()) {
+   open func connect() {
       
       if self.status != .closed {
          self.disconnect()
@@ -65,7 +77,7 @@ public class TCPSocket {
       inputStream! .delegate = inputStreamDelegate       
       outputStream!.delegate = outputStreamDelegate       
       
-      self.parseSettings(settings)
+      self.parseSettings()
       
       queue.async {
          
@@ -152,9 +164,7 @@ public class TCPSocket {
       }
    }
 
-   fileprivate func parseSettings(_ settings: Settings) {
-      
-      settings.forEach({ options[$0] = $1 })
+   fileprivate func parseSettings() {
       
       if options[SocketSecurityLevel] as? String == SocketSecurityLevelNegotiated {
       
