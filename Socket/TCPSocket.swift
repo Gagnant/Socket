@@ -24,10 +24,10 @@ public class TCPSocket {
 
    public var delegate: TCPSocketDelegate?
    
-   private(set) var status:  Status
-   private(set) var host:    String
-   private(set) var port:    Int
-   private(set) var options: Settings
+   private(set) public var status:  Status
+   private(set) public var host:    String
+   private(set) public var port:    Int
+   private(set) public var options: Settings
    
    fileprivate var outputStreamDelegate: StreamDelegate?
    fileprivate var inputStreamDelegate:  StreamDelegate?
