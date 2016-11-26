@@ -23,16 +23,17 @@ public class TCPSocket {
    public let queue = DispatchQueue(label: "com.gagnant.socket.socketqueue", attributes: [])
 
    public var delegate: TCPSocketDelegate?
-   public var status:   Status
-   public var host:     String
-   public var port:     Int
+   
+   private(set) var status:  Status
+   private(set) var host:    String
+   private(set) var port:    Int
+   private(set) var options: Settings
    
    fileprivate var outputStreamDelegate: StreamDelegate?
    fileprivate var inputStreamDelegate:  StreamDelegate?
    fileprivate var outputStream:         OutputStream?
    fileprivate var inputStream:          InputStream?
    fileprivate var runLoop:              RunLoop?
-   fileprivate var options:              Settings
 
    public init(host: String, port: Int) {
       
