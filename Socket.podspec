@@ -1,7 +1,7 @@
 Pod::Spec.new do |s|
 
   s.name         = "Socket"
-  s.version      = "0.1.6"
+  s.version      = "0.1.7"
   s.license      = { :type => "MIT" }
 
   s.homepage     = "https://github.com/Gagnant/Socket"

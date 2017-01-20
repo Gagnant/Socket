@@ -13,7 +13,7 @@ public protocol TCPSocketDelegate {
    func socketDidConnect    (_ socket: TCPSocket)
    func socketDidDisconnect (_ socket: TCPSocket)
    
-   func socket (_ socket: TCPSocket, didReceiveMessage text: String)
+   func socket (_ socket: TCPSocket, didReceiveData data: Data)
    func socket (_ socket: TCPSocket, didFailWithError error: NSError)
    
 }
@@ -29,11 +29,11 @@ public class TCPSocket {
    private(set) public var port:    Int
    private(set) public var options: Settings
    
-   fileprivate var outputStreamDelegate: StreamDelegate?
-   fileprivate var inputStreamDelegate:  StreamDelegate?
-   fileprivate var outputStream:         OutputStream?
-   fileprivate var inputStream:          InputStream?
-   fileprivate var runLoop:              RunLoop?
+   private var outputStreamDelegate: StreamDelegate?
+   private var inputStreamDelegate:  StreamDelegate?
+   private var outputStream:         OutputStream?
+   private var inputStream:          InputStream?
+   private var runLoop:              RunLoop?
 
    public init(host: String, port: Int) {
       
@@ -55,8 +55,8 @@ public class TCPSocket {
    public convenience init(host: String, port: Int, settings: Settings) {
       self.init(host: host, port: port)
       
-      settings.forEach { (key, value) in
-         options[key] = value
+      settings.forEach {
+         options[$0.key] = $0.value
       }
    }
 
@@ -119,11 +119,11 @@ public class TCPSocket {
       
       let data = Array(text.utf8)
       let length = data.count
-         
+		
       self.outputStream?.write(data, maxLength: length)
    }}
 
-   fileprivate func cInputStream(_ stream: Stream, event: Stream.Event) {
+   private func cInputStream(_ stream: Stream, event: Stream.Event) {
       
       switch event {
          
@@ -135,14 +135,9 @@ public class TCPSocket {
             disconnect()
          
          case Stream.Event.hasBytesAvailable:
-         
             let data = inputStream!.readAllData()
-            let text = String(data: data, encoding: String.Encoding.utf8)!
-         
-            if text != "" {
-               delegate?.socket(self, didReceiveMessage: text)
-            }
-         
+				delegate?.socket(self, didReceiveData: data)
+			
          case Stream.Event.endEncountered:
             self.disconnect()
          
@@ -150,8 +145,8 @@ public class TCPSocket {
       }
    }
 
-   fileprivate func cOutputStream(_ stream: Stream, event: Stream.Event) {
-      
+   private func cOutputStream(_ stream: Stream, event: Stream.Event) {
+		
       switch event {
          
          case Stream.Event.openCompleted:
@@ -165,7 +160,7 @@ public class TCPSocket {
       }
    }
 
-   fileprivate func parseSettings() {
+   private func parseSettings() {
       
       if options[SocketSecurityLevel] as? String == SocketSecurityLevelNegotiated {
       
@@ -187,7 +182,7 @@ public class TCPSocket {
       }
    }
    
-   fileprivate func handleSocketOpenning() {
+   private func handleSocketOpenning() {
       
       guard self.status == .opening else {
          return
