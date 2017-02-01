@@ -10,10 +10,11 @@ import Foundation
 
 public extension TCPSocket {
    
-   enum Status {
-      case opening
-      case opened
-      case closed
-   }
-   
+  enum Status {
+    case opening
+    case opened
+    case closed
+    case error
+  }
+  
 }

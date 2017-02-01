@@ -22,22 +22,26 @@
 
 /* Begin PBXBuildFile section */
 		0406D4BE1D8BCD5500B2F257 /* Status.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0406D4BD1D8BCD5500B2F257 /* Status.swift */; };
-		040AF8101D8BF1750056C68C /* RunLoopInvoker.swift in Sources */ = {isa = PBXBuildFile; fileRef = 040AF80F1D8BF1750056C68C /* RunLoopInvoker.swift */; };
-		0460DE4A1D42AAB30065A39D /* Options.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0460DE491D42AAB30065A39D /* Options.swift */; };
+		043F4D831E3F4E480047EBA6 /* ThreadComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043F4D821E3F4E480047EBA6 /* ThreadComponent.swift */; };
+		043F4D851E3F6D1E0047EBA6 /* Extensions+Thread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043F4D841E3F6D1E0047EBA6 /* Extensions+Thread.swift */; };
+		043F4D9C1E3FFB380047EBA6 /* StreamDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043F4D9B1E3FFB380047EBA6 /* StreamDelegate.swift */; };
+		0460DE4A1D42AAB30065A39D /* Settings.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0460DE491D42AAB30065A39D /* Settings.swift */; };
 		0492C7C31D20106800C5FD51 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 0492C7C21D20106800C5FD51 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0492C7EC1D21848700C5FD51 /* TCPSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0492C7EB1D21848700C5FD51 /* TCPSocket.swift */; };
-		0492C7F01D21878D00C5FD51 /* Extensions.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0492C7ED1D21850200C5FD51 /* Extensions.swift */; };
+		0492C7F01D21878D00C5FD51 /* Extensions+InputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0492C7ED1D21850200C5FD51 /* Extensions+InputStream.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		0406D4BD1D8BCD5500B2F257 /* Status.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Status.swift; sourceTree = "<group>"; };
-		040AF80F1D8BF1750056C68C /* RunLoopInvoker.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = RunLoopInvoker.swift; sourceTree = "<group>"; };
-		0460DE491D42AAB30065A39D /* Options.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.swift; path = Options.swift; sourceTree = "<group>"; tabWidth = 3; };
+		043F4D821E3F4E480047EBA6 /* ThreadComponent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadComponent.swift; sourceTree = "<group>"; };
+		043F4D841E3F6D1E0047EBA6 /* Extensions+Thread.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Extensions+Thread.swift"; sourceTree = "<group>"; };
+		043F4D9B1E3FFB380047EBA6 /* StreamDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamDelegate.swift; sourceTree = "<group>"; };
+		0460DE491D42AAB30065A39D /* Settings.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = Settings.swift; sourceTree = "<group>"; tabWidth = 2; usesTabs = 0; };
 		0492C7BF1D20106800C5FD51 /* Socket.framework */ = {isa = PBXFileReference; explicitFileType = wrapper.framework; includeInIndex = 0; path = Socket.framework; sourceTree = BUILT_PRODUCTS_DIR; };
 		0492C7C21D20106800C5FD51 /* Socket.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = Socket.h; sourceTree = "<group>"; };
 		0492C7C41D20106800C5FD51 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
-		0492C7EB1D21848700C5FD51 /* TCPSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.swift; path = TCPSocket.swift; sourceTree = "<group>"; tabWidth = 3; };
-		0492C7ED1D21850200C5FD51 /* Extensions.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 3; lastKnownFileType = sourcecode.swift; path = Extensions.swift; sourceTree = "<group>"; tabWidth = 3; };
+		0492C7EB1D21848700C5FD51 /* TCPSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = TCPSocket.swift; sourceTree = "<group>"; tabWidth = 2; };
+		0492C7ED1D21850200C5FD51 /* Extensions+InputStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = "Extensions+InputStream.swift"; sourceTree = "<group>"; tabWidth = 2; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -63,11 +67,13 @@
 		0460DE461D42754E0065A39D /* Sources */ = {
 			isa = PBXGroup;
 			children = (
-				040AF80F1D8BF1750056C68C /* RunLoopInvoker.swift */,
-				0492C7EB1D21848700C5FD51 /* TCPSocket.swift */,
-				0492C7ED1D21850200C5FD51 /* Extensions.swift */,
-				0460DE491D42AAB30065A39D /* Options.swift */,
+				0460DE491D42AAB30065A39D /* Settings.swift */,
 				0406D4BD1D8BCD5500B2F257 /* Status.swift */,
+				0492C7EB1D21848700C5FD51 /* TCPSocket.swift */,
+				043F4D821E3F4E480047EBA6 /* ThreadComponent.swift */,
+				043F4D9B1E3FFB380047EBA6 /* StreamDelegate.swift */,
+				0492C7ED1D21850200C5FD51 /* Extensions+InputStream.swift */,
+				043F4D841E3F6D1E0047EBA6 /* Extensions+Thread.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -196,10 +202,12 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				043F4D9C1E3FFB380047EBA6 /* StreamDelegate.swift in Sources */,
+				043F4D851E3F6D1E0047EBA6 /* Extensions+Thread.swift in Sources */,
 				0492C7EC1D21848700C5FD51 /* TCPSocket.swift in Sources */,
-				0460DE4A1D42AAB30065A39D /* Options.swift in Sources */,
-				040AF8101D8BF1750056C68C /* RunLoopInvoker.swift in Sources */,
-				0492C7F01D21878D00C5FD51 /* Extensions.swift in Sources */,
+				0460DE4A1D42AAB30065A39D /* Settings.swift in Sources */,
+				0492C7F01D21878D00C5FD51 /* Extensions+InputStream.swift in Sources */,
+				043F4D831E3F4E480047EBA6 /* ThreadComponent.swift in Sources */,
 				0406D4BE1D8BCD5500B2F257 /* Status.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
