@@ -9,17 +9,17 @@
 import Foundation
 
 internal class StreamDelegate: NSObject, Foundation.StreamDelegate {
-  
-  private var callback: Callback
-  
-  internal init(_ callback: @escaping Callback) {
-    self.callback = callback
-  }
-  
-  internal func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
-    callback(aStream, eventCode)
-  }
-  
-  internal typealias Callback = (Stream, Stream.Event) -> ()
-  
+	
+	private var callback: Callback
+	
+	internal init(_ callback: @escaping Callback) {
+		self.callback = callback
+	}
+	
+	internal func stream(_ aStream: Stream, handle eventCode: Stream.Event) {
+		callback(aStream, eventCode)
+	}
+	
+	internal typealias Callback = (Stream, Stream.Event) -> ()
+	
 }

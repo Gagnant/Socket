@@ -8,32 +8,32 @@
 
 import Foundation
 
-@objc private class InvocationContext: NSObject {
-  
-  private let block: () -> Void
-  
-  fileprivate init(with block: @escaping () -> Swift.Void) {
-    self.block = block
-  }
-  
-  @objc fileprivate func invoke() {
-    self.block()
-  }
-  
+@objc private class Context: NSObject {
+	
+	private let block: () -> Void
+	
+	fileprivate init(with block: @escaping () -> Swift.Void) {
+		self.block = block
+	}
+	
+	@objc fileprivate func invoke() {
+		self.block()
+	}
+	
 }
 
 extension Thread {
-  
-  @available(iOS 2.0, *)
-  internal convenience init(with block: @escaping () -> Swift.Void) {
-    let context = InvocationContext(with: block)
-    self.init(target: context, selector: #selector(InvocationContext.invoke), object: nil)
-  }
-  
-  @available(iOS 2.0, *)
-  internal func perform(_ block: @escaping () -> Swift.Void) {
-  	let context = InvocationContext(with: block)
-    context.perform(#selector(InvocationContext.invoke), on: self, with: nil, waitUntilDone: false)
-  }
-  
+	
+	@available(iOS 2.0, *)
+	internal convenience init(with block: @escaping () -> Swift.Void) {
+		let context = Context(with: block)
+		self.init(target: context, selector: #selector(Context.invoke), object: nil)
+	}
+	
+	@available(iOS 2.0, *)
+	internal func perform(_ block: @escaping () -> Swift.Void) {
+		let context = Context(with: block)
+		context.perform(#selector(Context.invoke), on: self, with: nil, waitUntilDone: false)
+	}
+	
 }
