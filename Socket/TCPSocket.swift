@@ -156,6 +156,7 @@ public class TCPSocket {
 	
 	private func setupStreams() {
 		Stream.getStreamsToHost(withName: config.host, port: config.port, inputStream: &inputStream, outputStream: &outputStream)
+		setupSocketsSecurity()
 		inputStream!.delegate = inputStreamDelegate
 		outputStream!.delegate = outputStreamDelegate
 		inputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
