@@ -59,35 +59,17 @@ public class TCPSocket {
 	
 	public func connect() {
 		TCPSocket.workingThread.perform {
-			guard self.status == .closed else {
+			guard self.status == .closed || self.status == .error else {
 				return
 			}
-			
-			Stream.getStreamsToHost(withName: self.config.host, port: self.config.port,
-			                        inputStream: &self.inputStream, outputStream: &self.outputStream)
-			
 			self.status = .opening
-			
-			self.inputStream!.delegate = self.inputStreamDelegate
-			self.inputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-			self.inputStream!.open()
-			
-			self.outputStream!.delegate = self.outputStreamDelegate
-			self.outputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-			self.outputStream!.open()
+			self.setupStreams()
 		}
 	}
 	
 	public func disconnect() {
 		TCPSocket.workingThread.perform {
-			self.inputStream?.close()
-			self.inputStream?.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-			self.inputStream = nil
-			
-			self.outputStream?.close()
-			self.outputStream?.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-			self.outputStream = nil
-			
+			self.disposeStreams()
 			self.status = .closed
 			self.delegateQueue?.async {
 				self.delegate?.socketDidDisconnect(self)
@@ -97,9 +79,6 @@ public class TCPSocket {
 	
 	public func write(_ data: Data) {
 		TCPSocket.workingThread.perform {
-			guard self.status == .opened else {
-				return
-			}
 			let bytes = [UInt8](data)
 			self.outputStream?.write(bytes, maxLength: bytes.count)
 		}
@@ -107,9 +86,6 @@ public class TCPSocket {
 	
 	public func write(_ text: String) {
 		TCPSocket.workingThread.perform {
-			guard self.status == .opened else {
-				return
-			}
 			let bytes = Array(text.utf8)
 			self.outputStream?.write(bytes, maxLength: bytes.count)
 		}
@@ -144,23 +120,8 @@ public class TCPSocket {
 		}
 	}
 	
-	private func parseSettings() {
-		if case Security.negitiated(let validates) = self.config.security {
-			inputStream!.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
-			outputStream!.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
-			if !validates {
-				let settings = [kCFStreamSSLValidatesCertificateChain as String: kCFBooleanFalse] as CFTypeRef
-				let property = CFStreamPropertyKey(kCFStreamPropertySSLSettings)
-				CFReadStreamSetProperty (inputStream, property, settings)
-				CFWriteStreamSetProperty(outputStream, property, settings)
-			}
-		}
-	}
-	
 	private func handleOpenning() {
-		guard status == .opening,
-		      inputStream!.streamStatus == .open,
-		      outputStream!.streamStatus == .open else {
+		guard status == .opening, inputStream!.streamStatus == .open, outputStream!.streamStatus == .open else {
 			return
 		}
 		status = .opened
@@ -178,6 +139,38 @@ public class TCPSocket {
 			self.delegate?.socket(self, didFailWithError: error)
 		}
 		disconnect()
+	}
+	
+	private func setupSocketsSecurity() {
+		if case Security.negitiated(let validates) = config.security {
+			inputStream!.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			outputStream!.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
+			if !validates {
+				let settings = [kCFStreamSSLValidatesCertificateChain as String: kCFBooleanFalse] as CFTypeRef
+				let property = CFStreamPropertyKey(kCFStreamPropertySSLSettings)
+				CFReadStreamSetProperty(inputStream, property, settings)
+				CFWriteStreamSetProperty(outputStream, property, settings)
+			}
+		}
+	}
+	
+	private func setupStreams() {
+		Stream.getStreamsToHost(withName: config.host, port: config.port, inputStream: &inputStream, outputStream: &outputStream)
+		inputStream!.delegate = inputStreamDelegate
+		outputStream!.delegate = outputStreamDelegate
+		inputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+		outputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+		inputStream!.open()
+		outputStream!.open()
+	}
+	
+	private func disposeStreams() {
+		self.inputStream?.close()
+		self.outputStream?.close()
+		self.inputStream?.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+		self.outputStream?.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+		self.inputStream = nil
+		self.outputStream = nil
 	}
 	
 }
