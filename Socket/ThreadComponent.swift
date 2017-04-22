@@ -11,7 +11,8 @@ import Foundation
 internal class ThreadComponent: NSObject {
 	
 	private var thread: Thread?
-	private let condition: NSCondition
+	private let condition: NSLock
+	private let semaphore: DispatchSemaphore
 	
 	internal static func detachNew() -> ThreadComponent {
 		let component = ThreadComponent()
@@ -20,7 +21,8 @@ internal class ThreadComponent: NSObject {
 	}
 	
 	internal override init() {
-		condition = NSCondition()
+		condition = NSLock()
+		semaphore = DispatchSemaphore(value: 0)
 		super.init()
 	}
 	
@@ -33,7 +35,7 @@ internal class ThreadComponent: NSObject {
 		if thread == nil {
 			thread = Thread(with: threadProc)
 			thread?.start()
-			condition.wait()
+			semaphore.wait()
 		}
 		condition.unlock()
 	}
@@ -55,7 +57,7 @@ internal class ThreadComponent: NSObject {
 		context.perform = { pointer in }
 		var source = CFRunLoopSourceCreate(nil, 0, &context)
 		CFRunLoopAddSource(CFRunLoopGetCurrent(), source, CFRunLoopMode.commonModes)
-		self.condition.signal()
+		self.semaphore.signal()
 		CFRunLoopRun()
 		//Will get here after run loop will stop execution
 		CFRunLoopRemoveSource(CFRunLoopGetCurrent(), source, CFRunLoopMode.commonModes)
