@@ -9,13 +9,23 @@
 import Foundation
 
 public protocol TCPSocketDelegate {
+
+	/// Called when a transport connects and is ready for reading and writing.
+	func socketDidConnect(_ socket: TCPSocket)
+
+	/// Called when a socket disconnects with or without error.
+	///
+	/// If you call the disconnect method, and the socket wasn't already disconnected,
+	/// then an invocation of this delegate method will be enqueued on the delegateQueue
+	/// before the disconnect method returns.
+	func socketDidDisconnect(_ socket: TCPSocket, withError error: Error?)
+
+	/// Called when a socket has read in data.
+	func socket(_ socket: TCPSocket, didReceiveData data: Data)
 	
-	func socketDidConnect (_ socket: TCPSocket)
-	func socketDidDisconnect (_ socket: TCPSocket)
-	
-	func socket (_ socket: TCPSocket, didReceiveData data: Data)
-	func socket (_ socket: TCPSocket, didFailWithError error: Error)
-	
+	/// Called when an error occurs in socket.
+	func socket(_ socket: TCPSocket, didFailWithError error: Error)
+
 }
 
 public class TCPSocket {
@@ -72,7 +82,17 @@ public class TCPSocket {
 			self.disposeStreams()
 			self.status = .closed(nil)
 			self.delegateQueue?.async {
-				self.delegate?.socketDidDisconnect(self)
+				self.delegate?.socketDidDisconnect(self, withError: nil)
+			}
+		}
+	}
+	
+	private func disconnect(withError error: Error) {
+		TCPSocket.workingThread.perform {
+			self.disposeStreams()
+			self.status = .closed(error)
+			self.delegateQueue?.async {
+				self.delegate?.socketDidDisconnect(self, withError: error)
 			}
 		}
 	}
@@ -138,7 +158,7 @@ public class TCPSocket {
 		delegateQueue?.async {
 			self.delegate?.socket(self, didFailWithError: error)
 		}
-		disconnect()
+		disconnect(withError: error)
 	}
 	
 	private func setupSocketsSecurity() {
