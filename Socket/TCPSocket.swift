@@ -8,7 +8,7 @@
 
 import Foundation
 
-public protocol TCPSocketDelegate {
+public protocol TCPSocketDelegate: class {
 
 	/// Called when a transport connects and is ready for reading and writing.
 	func socketDidConnect(_ socket: TCPSocket)
@@ -36,12 +36,13 @@ public class TCPSocket {
 
 	// MARK: -
 	
-	private static let workingThread = ThreadComponent.detachNew()
+	private(set) public weak var delegate: TCPSocketDelegate?
 	
-	private(set) public var delegate: TCPSocketDelegate?
 	private(set) public var delegateQueue: DispatchQueue?
 	private(set) public var status: Status
 	private(set) public var config: Config
+	
+	private static let workingThread = ThreadComponent.detachNew()
 	
 	private var inputStreamDelegate: StreamDelegate?
 	private var outputStreamDelegate: StreamDelegate?
