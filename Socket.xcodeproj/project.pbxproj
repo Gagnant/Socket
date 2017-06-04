@@ -28,6 +28,7 @@
 		0492C7C31D20106800C5FD51 /* Socket.h in Headers */ = {isa = PBXBuildFile; fileRef = 0492C7C21D20106800C5FD51 /* Socket.h */; settings = {ATTRIBUTES = (Public, ); }; };
 		0492C7EC1D21848700C5FD51 /* TCPSocket.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0492C7EB1D21848700C5FD51 /* TCPSocket.swift */; };
 		0492C7F01D21878D00C5FD51 /* Extensions+InputStream.swift in Sources */ = {isa = PBXBuildFile; fileRef = 0492C7ED1D21850200C5FD51 /* Extensions+InputStream.swift */; };
+		04DDA4CF1EE4B28D00705DE4 /* Synchronized.swift in Sources */ = {isa = PBXBuildFile; fileRef = 04DDA4CE1EE4B28D00705DE4 /* Synchronized.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
@@ -40,6 +41,7 @@
 		0492C7C41D20106800C5FD51 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
 		0492C7EB1D21848700C5FD51 /* TCPSocket.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = TCPSocket.swift; sourceTree = "<group>"; tabWidth = 2; };
 		0492C7ED1D21850200C5FD51 /* Extensions+InputStream.swift */ = {isa = PBXFileReference; fileEncoding = 4; indentWidth = 2; lastKnownFileType = sourcecode.swift; path = "Extensions+InputStream.swift"; sourceTree = "<group>"; tabWidth = 2; };
+		04DDA4CE1EE4B28D00705DE4 /* Synchronized.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Synchronized.swift; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -71,6 +73,7 @@
 				043F4D9B1E3FFB380047EBA6 /* StreamDelegate.swift */,
 				0492C7ED1D21850200C5FD51 /* Extensions+InputStream.swift */,
 				043F4D841E3F6D1E0047EBA6 /* Extensions+Thread.swift */,
+				04DDA4CE1EE4B28D00705DE4 /* Synchronized.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -203,6 +206,7 @@
 				043F4D851E3F6D1E0047EBA6 /* Extensions+Thread.swift in Sources */,
 				0492C7EC1D21848700C5FD51 /* TCPSocket.swift in Sources */,
 				0460DE4A1D42AAB30065A39D /* Config.swift in Sources */,
+				04DDA4CF1EE4B28D00705DE4 /* Synchronized.swift in Sources */,
 				0492C7F01D21878D00C5FD51 /* Extensions+InputStream.swift in Sources */,
 				043F4D831E3F4E480047EBA6 /* ThreadComponent.swift in Sources */,
 			);

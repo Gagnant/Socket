@@ -36,24 +36,78 @@ public class TCPSocket {
 
 	// MARK: -
 	
-	private(set) public weak var delegate: TCPSocketDelegate?
-	
-	private(set) public var delegateQueue: DispatchQueue?
-	private(set) public var status: Status
-	private(set) public var config: Config
-	
 	private static let workingThread = ThreadComponent.detachNew()
+	
+	private(set) public var unsafeDelegateQueue: DispatchQueue?
+	private(set) public var unsafeStatus: Status
+	private(set) public var unsafeConfig: Config
+	
+	private(set) public weak var unsafeDelegate: TCPSocketDelegate?
 	
 	private var inputStreamDelegate: StreamDelegate?
 	private var outputStreamDelegate: StreamDelegate?
 	private var inputStream: InputStream?
 	private var outputStream: OutputStream?
 	
+	// MARK: - 
+	
+	public var delegate: TCPSocketDelegate? {
+		get {
+			return synchronized(self) {
+				return unsafeDelegate
+			}
+		}
+		set {
+			synchronized(self) {
+				unsafeDelegate = newValue
+			}
+		}
+	}
+	
+	public var delegateQueue: DispatchQueue? {
+		get {
+			return synchronized(self) {
+				return unsafeDelegateQueue
+			}
+		}
+		set {
+			synchronized(self) {
+				unsafeDelegateQueue = newValue
+			}
+		}
+	}
+	
+	private(set) public var status: Status {
+		get {
+			return synchronized(self) {
+				return unsafeStatus
+			}
+		}
+		set {
+			synchronized(self) {
+				unsafeStatus = newValue
+			}
+		}
+	}
+	
+	private(set) public var config: Config {
+		get {
+			return synchronized(self) {
+				return unsafeConfig
+			}
+		}
+		set {
+			synchronized(self) {
+				unsafeConfig = newValue
+			}
+		}
+	}
+	
 	// MARK: -
 	
 	public init(with config: Config) {
-		self.config = config
-		self.status = .closed(nil)
+		self.unsafeConfig = config
+		self.unsafeStatus = .closed(nil)
 		inputStreamDelegate = StreamDelegate(cInputStream)
 		outputStreamDelegate = StreamDelegate(cOutputStream)
 	}
