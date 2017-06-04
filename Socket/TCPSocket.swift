@@ -105,18 +105,13 @@ public class TCPSocket {
 	
 	// MARK: -
 	
-	public init(with config: Config) {
+	public init(with config: Config, delegate: TCPSocketDelegate? = nil, delegateQueue: DispatchQueue = .main) {
 		self.unsafeConfig = config
 		self.unsafeStatus = .closed(nil)
-		self.unsafeDelegateQueue = DispatchQueue.main
+		self.unsafeDelegate = delegate
+		self.unsafeDelegateQueue = delegateQueue
 		inputStreamDelegate = StreamDelegate(cInputStream)
 		outputStreamDelegate = StreamDelegate(cOutputStream)
-	}
-	
-	public convenience init(with config: Config, delegate: TCPSocketDelegate, delegateQueue: DispatchQueue = .main) {
-		self.init(with: config)
-		self.delegate = delegate
-		self.delegateQueue = delegateQueue
 	}
 	
 	deinit {
