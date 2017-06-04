@@ -21,17 +21,17 @@ public protocol TCPSocketDelegate {
 public class TCPSocket {
 	
 	public enum Status {
-		case opening, opened, closed, error
+		case opening, opened, closed(Error?)
 	}
+
+	// MARK: -
+	
+	private static let workingThread = ThreadComponent.detachNew()
 	
 	private(set) public var delegate: TCPSocketDelegate?
 	private(set) public var delegateQueue: DispatchQueue?
 	private(set) public var status: Status
 	private(set) public var config: Config
-	
-	// MARK: -
-	
-	private static let workingThread = ThreadComponent.detachNew()
 	
 	private var inputStreamDelegate: StreamDelegate?
 	private var outputStreamDelegate: StreamDelegate?
@@ -42,7 +42,7 @@ public class TCPSocket {
 	
 	public init(with config: Config) {
 		self.config = config
-		self.status = .closed
+		self.status = .closed(nil)
 		inputStreamDelegate = StreamDelegate(cInputStream)
 		outputStreamDelegate = StreamDelegate(cOutputStream)
 	}
@@ -59,7 +59,7 @@ public class TCPSocket {
 	
 	public func connect() {
 		TCPSocket.workingThread.perform {
-			guard self.status == .closed || self.status == .error else {
+			guard case .closed = self.status else {
 				return
 			}
 			self.status = .opening
@@ -70,7 +70,7 @@ public class TCPSocket {
 	public func disconnect() {
 		TCPSocket.workingThread.perform {
 			self.disposeStreams()
-			self.status = .closed
+			self.status = .closed(nil)
 			self.delegateQueue?.async {
 				self.delegate?.socketDidDisconnect(self)
 			}
@@ -121,7 +121,7 @@ public class TCPSocket {
 	}
 	
 	private func handleOpenning() {
-		guard status == .opening, inputStream!.streamStatus == .open, outputStream!.streamStatus == .open else {
+		guard case .opening = status, inputStream!.streamStatus == .open, outputStream!.streamStatus == .open else {
 			return
 		}
 		status = .opened
@@ -131,10 +131,10 @@ public class TCPSocket {
 	}
 	
 	private func handleError(error: Error) {
-		guard status != .error else {
+		if case .closed = status {
 			return
 		}
-		status = .error
+		status = .closed(error)
 		delegateQueue?.async {
 			self.delegate?.socket(self, didFailWithError: error)
 		}
