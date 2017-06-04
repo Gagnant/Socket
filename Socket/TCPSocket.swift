@@ -116,7 +116,7 @@ public class TCPSocket {
 			case Stream.Event.openCompleted:
 				handleOpenning()
 			case Stream.Event.errorOccurred:
-				handleError(error: stream.streamError!)
+				disconnect(withError: stream.streamError)
 			case Stream.Event.hasBytesAvailable:
 				let data = inputStream!.readAllData()
 				delegateQueue?.async {
@@ -133,7 +133,7 @@ public class TCPSocket {
 			case Stream.Event.openCompleted:
 				handleOpenning()
 			case Stream.Event.errorOccurred:
-				handleError(error: stream.streamError!)
+				disconnect(withError: stream.streamError)
 			default: break
 		}
 	}
@@ -146,17 +146,6 @@ public class TCPSocket {
 		delegateQueue?.async {
 			self.delegate?.socketDidConnect(self)
 		}
-	}
-	
-	private func handleError(error: Error) {
-		if case .closed = status {
-			return
-		}
-		status = .closed(error)
-		delegateQueue?.async {
-			self.delegate?.socket(self, didFailWithError: error)
-		}
-		disconnect(withError: error)
 	}
 	
 	private func setupSocketsSecurity() {
