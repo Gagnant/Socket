@@ -38,7 +38,7 @@ public class TCPSocket {
 	
 	private static let workingThread = ThreadComponent.detachNew()
 	
-	private(set) public var unsafeDelegateQueue: DispatchQueue?
+	private(set) public var unsafeDelegateQueue: DispatchQueue
 	private(set) public var unsafeStatus: Status
 	private(set) public var unsafeConfig: Config
 	
@@ -64,7 +64,7 @@ public class TCPSocket {
 		}
 	}
 	
-	public var delegateQueue: DispatchQueue? {
+	public var delegateQueue: DispatchQueue {
 		get {
 			return synchronized(self) {
 				return unsafeDelegateQueue
@@ -108,6 +108,7 @@ public class TCPSocket {
 	public init(with config: Config) {
 		self.unsafeConfig = config
 		self.unsafeStatus = .closed(nil)
+		self.unsafeDelegateQueue = DispatchQueue.main
 		inputStreamDelegate = StreamDelegate(cInputStream)
 		outputStreamDelegate = StreamDelegate(cOutputStream)
 	}
@@ -143,7 +144,7 @@ public class TCPSocket {
 			}
 			self.disposeStreams()
 			self.status = .closed(error)
-			self.delegateQueue?.async {
+			self.delegateQueue.async {
 				self.delegate?.socket(self, didDisconnectWithError: error)
 			}
 		}
@@ -173,7 +174,7 @@ public class TCPSocket {
 				disconnect(withError: stream.streamError)
 			case Stream.Event.hasBytesAvailable:
 				let data = inputStream!.readAllData()
-				delegateQueue?.async {
+				delegateQueue.async {
 					self.delegate?.socket(self, didReceiveData: data)
 				}
 			case Stream.Event.endEncountered:
@@ -197,7 +198,7 @@ public class TCPSocket {
 			return
 		}
 		status = .opened
-		delegateQueue?.async {
+		delegateQueue.async {
 			self.delegate?.socketDidConnect(self)
 		}
 	}
