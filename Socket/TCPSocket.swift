@@ -79,17 +79,14 @@ public class TCPSocket {
 	}
 	
 	public func disconnect() {
-		TCPSocket.workingThread.perform {
-			self.disposeStreams()
-			self.status = .closed(nil)
-			self.delegateQueue?.async {
-				self.delegate?.socketDidDisconnect(self, withError: nil)
-			}
-		}
+		self.disconnect(withError: nil)
 	}
 	
-	private func disconnect(withError error: Error) {
+	private func disconnect(withError error: Error?) {
 		TCPSocket.workingThread.perform {
+			if case .closed = self.status {
+				return
+			}
 			self.disposeStreams()
 			self.status = .closed(error)
 			self.delegateQueue?.async {
