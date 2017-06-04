@@ -18,7 +18,7 @@ public protocol TCPSocketDelegate: class {
 	/// If you call the disconnect method, and the socket wasn't already disconnected,
 	/// then an invocation of this delegate method will be enqueued on the delegateQueue
 	/// before the disconnect method returns.
-	func socketDidDisconnect(_ socket: TCPSocket, withError error: Error?)
+	func socket(_ socket: TCPSocket, didDisconnectWithError error: Error?)
 
 	/// Called when a socket has read in data.
 	func socket(_ socket: TCPSocket, didReceiveData data: Data)
@@ -90,7 +90,7 @@ public class TCPSocket {
 			self.disposeStreams()
 			self.status = .closed(error)
 			self.delegateQueue?.async {
-				self.delegate?.socketDidDisconnect(self, withError: error)
+				self.delegate?.socket(self, didDisconnectWithError: error)
 			}
 		}
 	}
