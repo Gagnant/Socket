@@ -31,10 +31,18 @@ public protocol TCPSocketDelegate: class {
 public class TCPSocket {
 	
 	public enum Status {
-		case opening, opened, closed(Error?)
+		
+		/// Socket is in the process of connecting.
+		case opening
+		
+		/// Socket is opened and is ready for use.
+		case opened
+		
+		/// Socket is closed with optional error.
+		case closed(Error?)
 	}
 
-	// MARK: -
+	// MARK: - Properties
 	
 	private static let workingThread = ThreadComponent.detachNew()
 
@@ -48,7 +56,7 @@ public class TCPSocket {
 	private var inputStream: InputStream?
 	private var outputStream: OutputStream?
 	
-	// MARK: - 
+	// MARK: - Public properties
 	
 	public var delegate: TCPSocketDelegate? {
 		get {
@@ -63,6 +71,8 @@ public class TCPSocket {
 		}
 	}
 	
+	/// Socket uses the standard delegate paradigm and executes all delegate callbacks on a given
+	/// delegate dispatch queue.
 	public var delegateQueue: DispatchQueue {
 		get {
 			return synchronized(self) {
@@ -76,6 +86,12 @@ public class TCPSocket {
 		}
 	}
 	
+	/// Returns the state of socket.
+	///
+	/// A disconnected socket may be recycled.
+	/// That is, it can be used again for connecting.
+	///
+	/// If a socket is in the process of connecting, it may be neither disconnected nor connected.
 	private(set) public var status: Status {
 		get {
 			return synchronized(self) {
@@ -89,9 +105,10 @@ public class TCPSocket {
 		}
 	}
 	
+	/// Returns the configuration which was used to create the socket.
 	public let config: Config
 	
-	// MARK: -
+	// MARK: - Lifecycle
 	
 	public init(with config: Config, delegate: TCPSocketDelegate? = nil, delegateQueue: DispatchQueue = .main) {
 		self.config = config
@@ -106,6 +123,14 @@ public class TCPSocket {
 		disconnect()
 	}
 	
+	// MARK: - Connecting
+	
+	/// Connects the socket.
+	///
+	/// This method will start a background connect operation and immediately return.
+	///
+	/// The delegate callbacks are used to notify you when the socket connects, or if the host
+	/// was unreachable.
 	public func connect() {
 		TCPSocket.workingThread.perform {
 			guard case .closed = self.status else {
@@ -116,6 +141,14 @@ public class TCPSocket {
 		}
 	}
 	
+	// MARK: - Disconnecting
+	
+	/// Disconnects immediately (synchronously).
+	///
+	/// If the socket is not already disconnected, an invocation to the
+	/// socket:didDisconnectWithError: delegate method will be queued onto the delegateQueue
+	/// asynchronously. In other words, the delegate method will be invoked sometime shortly
+	/// after this method returns.
 	public func disconnect() {
 		self.disconnect(withError: nil)
 	}
@@ -133,13 +166,17 @@ public class TCPSocket {
 		}
 	}
 	
+	// MARK: - Writing
+	
+	/// Writes data to the socket. If you pass in zero-length data, this method does nothing.
 	public func write(_ data: Data) {
 		TCPSocket.workingThread.perform {
 			let bytes = [UInt8](data)
 			self.outputStream?.write(bytes, maxLength: bytes.count)
 		}
 	}
-	
+
+	/// Writes UTF-8 encoded string to the socket.
 	public func write(_ text: String) {
 		TCPSocket.workingThread.perform {
 			let bytes = Array(text.utf8)
@@ -147,7 +184,7 @@ public class TCPSocket {
 		}
 	}
 	
-	// MARK: - Private Section
+	// MARK: - Private section
 	
 	private func cInputStream(_ stream: Stream, event: Stream.Event) {
 		switch event {
