@@ -21,6 +21,7 @@
 /* End PBXAggregateTarget section */
 
 /* Begin PBXBuildFile section */
+		041C91501EE57F3B00C4A5B1 /* Method.swift in Sources */ = {isa = PBXBuildFile; fileRef = 041C914F1EE57F3B00C4A5B1 /* Method.swift */; };
 		043F4D831E3F4E480047EBA6 /* ThreadComponent.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043F4D821E3F4E480047EBA6 /* ThreadComponent.swift */; };
 		043F4D851E3F6D1E0047EBA6 /* Extensions+Thread.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043F4D841E3F6D1E0047EBA6 /* Extensions+Thread.swift */; };
 		043F4D9C1E3FFB380047EBA6 /* StreamDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = 043F4D9B1E3FFB380047EBA6 /* StreamDelegate.swift */; };
@@ -32,6 +33,7 @@
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
+		041C914F1EE57F3B00C4A5B1 /* Method.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = Method.swift; sourceTree = "<group>"; };
 		043F4D821E3F4E480047EBA6 /* ThreadComponent.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = ThreadComponent.swift; sourceTree = "<group>"; tabWidth = 2; };
 		043F4D841E3F6D1E0047EBA6 /* Extensions+Thread.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = "Extensions+Thread.swift"; sourceTree = "<group>"; };
 		043F4D9B1E3FFB380047EBA6 /* StreamDelegate.swift */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.swift; path = StreamDelegate.swift; sourceTree = "<group>"; tabWidth = 2; };
@@ -74,6 +76,7 @@
 				0492C7ED1D21850200C5FD51 /* Extensions+InputStream.swift */,
 				043F4D841E3F6D1E0047EBA6 /* Extensions+Thread.swift */,
 				04DDA4CE1EE4B28D00705DE4 /* Synchronized.swift */,
+				041C914F1EE57F3B00C4A5B1 /* Method.swift */,
 			);
 			name = Sources;
 			sourceTree = "<group>";
@@ -207,6 +210,7 @@
 				0492C7EC1D21848700C5FD51 /* TCPSocket.swift in Sources */,
 				0460DE4A1D42AAB30065A39D /* Config.swift in Sources */,
 				04DDA4CF1EE4B28D00705DE4 /* Synchronized.swift in Sources */,
+				041C91501EE57F3B00C4A5B1 /* Method.swift in Sources */,
 				0492C7F01D21878D00C5FD51 /* Extensions+InputStream.swift in Sources */,
 				043F4D831E3F4E480047EBA6 /* ThreadComponent.swift in Sources */,
 			);

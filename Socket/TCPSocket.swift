@@ -115,8 +115,8 @@ public class TCPSocket {
 		self.unsafeStatus = .closed(nil)
 		self.unsafeDelegate = delegate
 		self.unsafeDelegateQueue = delegateQueue
-		inputStreamDelegate = StreamDelegate(cInputStream)
-		outputStreamDelegate = StreamDelegate(cOutputStream)
+		inputStreamDelegate = StreamDelegate(Method.weak(self, TCPSocket.cInputStream))
+		outputStreamDelegate = StreamDelegate(Method.weak(self, TCPSocket.cOutputStream))
 	}
 	
 	deinit {
