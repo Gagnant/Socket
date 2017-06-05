@@ -37,12 +37,12 @@ public class TCPSocket {
 	// MARK: -
 	
 	private static let workingThread = ThreadComponent.detachNew()
-	
-	private(set) public var unsafeDelegateQueue: DispatchQueue
-	private(set) public var unsafeStatus: Status
-	private(set) public var unsafeConfig: Config
-	
-	private(set) public weak var unsafeDelegate: TCPSocketDelegate?
+
+	private var unsafeDelegateQueue: DispatchQueue
+	private var unsafeStatus: Status
+	private var unsafeConfig: Config
+
+	private weak var unsafeDelegate: TCPSocketDelegate?
 	
 	private var inputStreamDelegate: StreamDelegate?
 	private var outputStreamDelegate: StreamDelegate?
