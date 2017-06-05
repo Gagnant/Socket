@@ -40,7 +40,6 @@ public class TCPSocket {
 
 	private var unsafeDelegateQueue: DispatchQueue
 	private var unsafeStatus: Status
-	private var unsafeConfig: Config
 
 	private weak var unsafeDelegate: TCPSocketDelegate?
 	
@@ -90,23 +89,12 @@ public class TCPSocket {
 		}
 	}
 	
-	private(set) public var config: Config {
-		get {
-			return synchronized(self) {
-				return unsafeConfig
-			}
-		}
-		set {
-			synchronized(self) {
-				unsafeConfig = newValue
-			}
-		}
-	}
+	public let config: Config
 	
 	// MARK: -
 	
 	public init(with config: Config, delegate: TCPSocketDelegate? = nil, delegateQueue: DispatchQueue = .main) {
-		self.unsafeConfig = config
+		self.config = config
 		self.unsafeStatus = .closed(nil)
 		self.unsafeDelegate = delegate
 		self.unsafeDelegateQueue = delegateQueue
