@@ -120,7 +120,7 @@ public class TCPSocket {
 	}
 	
 	deinit {
-		disconnect()
+		self.disposeStreams()
 	}
 	
 	// MARK: - Connecting
