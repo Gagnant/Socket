@@ -48,6 +48,7 @@ public class TCPSocket {
 
 	private var unsafeDelegateQueue: DispatchQueue
 	private var unsafeStatus: Status
+	private var unsafeConfig: Config
 
 	private weak var unsafeDelegate: TCPSocketDelegate?
 	
@@ -105,13 +106,36 @@ public class TCPSocket {
 		}
 	}
 	
-	/// Returns the configuration which was used to create the socket.
-	public let config: Config
+	/// Returns the configuration of this socket.
+	public var config: Config {
+		get {
+			return synchronized(self) {
+				return unsafeConfig
+			}
+		}
+		set {
+			synchronized(self) {
+				unsafeConfig = newValue
+			}
+		}
+	}
+
+	/// The host this socket be connected to.
+	public let host: String
+	
+	/// The port this socket to be connected on.
+	public let port: Int
+	
+	/// Security property indicating the security level of this socket.
+	public let security: Security
 	
 	// MARK: - Lifecycle
 	
-	public init(with config: Config, delegate: TCPSocketDelegate? = nil, delegateQueue: DispatchQueue = .main) {
-		self.config = config
+	public init(with host: String, port: Int, security: Security = .default, delegate: TCPSocketDelegate? = nil, delegateQueue: DispatchQueue = .main, config: Config = .default) {
+		self.host = host
+		self.port = port
+		self.security = security
+		self.unsafeConfig = config
 		self.unsafeStatus = .closed(nil)
 		self.unsafeDelegate = delegate
 		self.unsafeDelegateQueue = delegateQueue
@@ -224,7 +248,7 @@ public class TCPSocket {
 	}
 	
 	private func setupSocketsSecurity() {
-		if case Security.negitiated(let validates) = config.security {
+		if case Security.negitiated(let validates) = self.security {
 			inputStream!.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
 			outputStream!.setProperty(StreamSocketSecurityLevel.negotiatedSSL, forKey: Stream.PropertyKey.socketSecurityLevelKey)
 			if !validates {
@@ -237,7 +261,7 @@ public class TCPSocket {
 	}
 	
 	private func setupStreams() {
-		Stream.getStreamsToHost(withName: config.host, port: config.port, inputStream: &inputStream, outputStream: &outputStream)
+		Stream.getStreamsToHost(withName: host, port: port, inputStream: &inputStream, outputStream: &outputStream)
 		setupSocketsSecurity()
 		inputStream!.delegate = inputStreamDelegate
 		outputStream!.delegate = outputStreamDelegate
