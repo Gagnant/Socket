@@ -265,8 +265,8 @@ public class TCPSocket {
 		setupSocketsSecurity()
 		inputStream!.delegate = inputStreamDelegate
 		outputStream!.delegate = outputStreamDelegate
-		inputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-		outputStream!.schedule(in: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+		inputStream!.schedule(in: RunLoop.current, forMode: RunLoop.Mode.default)
+		outputStream!.schedule(in: RunLoop.current, forMode: RunLoop.Mode.default)
 		inputStream!.open()
 		outputStream!.open()
 	}
@@ -274,8 +274,8 @@ public class TCPSocket {
 	private func disposeStreams() {
 		self.inputStream?.close()
 		self.outputStream?.close()
-		self.inputStream?.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
-		self.outputStream?.remove(from: RunLoop.current, forMode: RunLoopMode.defaultRunLoopMode)
+		self.inputStream?.remove(from: RunLoop.current, forMode: RunLoop.Mode.default)
+		self.outputStream?.remove(from: RunLoop.current, forMode: RunLoop.Mode.default)
 		self.inputStream = nil
 		self.outputStream = nil
 	}
